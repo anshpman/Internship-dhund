@@ -29,9 +29,26 @@ driver.get(url)
 
 # Introduce a random delay to mimic human behavior
 time.sleep(random.uniform(2, 5))  # Random delay between 2 and 5 seconds
-
+# Define keywords for AI/ML roles (converted to lowercase for case-insensitive matching)
 # Define keywords for AI/ML roles
-keywords = ["data", "machine", "python", "ai", "ml", "developer", "science"]
+keywords = [
+    "data scientist", "machine learning engineer", "ai engineer", "data analyst", 
+    "data engineer", "deep learning engineer", "data scientist intern", "ml engineer", 
+    "ai researcher", "research scientist", "computer vision engineer", "natural language processing", 
+    "nlp engineer", "data architect", "business intelligence", "statistical analyst", 
+    "predictive modeler", "data science intern", "big data engineer", "data visualization", 
+    "cloud data engineer", "data operations", "quantitative analyst", "analytics engineer", 
+    "big data analyst", "mlops engineer", "artificial intelligence", "ai researcher", 
+    "robotics engineer", "data mining", "quantitative data scientist", "data strategist", 
+    "data consultant", "data science researcher", "ai developer", "data modeler", 
+    "data wrangler", "data processing", "data science manager", "data science consultant", 
+    "research analyst", "software engineer - machine learning", "business data analyst", 
+    "data science specialist", "data science lead", "junior data scientist", "senior data scientist", 
+    "data science expert", "machine learning scientist", "data mining engineer", 
+    "ml research scientist", "data science trainer", "computer scientist", "cloud data scientist", 
+    "data science director", "ai project manager", "ai solution architect", "data operations manager"
+]
+
 
 try:
     # Wait for the job listing container to load
@@ -39,7 +56,7 @@ try:
         EC.presence_of_element_located((By.CSS_SELECTOR, "#listContainer"))
     )
     
-    # Locate job elements with more specific selectors
+    # Locate job elements
     job_elements = driver.find_elements(By.CSS_SELECTOR, ".styles_job-listing-container__OCfZC a")
     
     if not job_elements:
@@ -48,31 +65,38 @@ try:
         print("Extracting job details:")
         for element in job_elements:
             try:
-                job_title = element.text.strip()
+                job_title = element.text.strip().lower()  # Normalize to lowercase
                 job_link = element.get_attribute("href")
                 
-                # Check if the title matches AI/ML keywords
-                if any(keyword in job_title.lower() for keyword in keywords):
+                # Check if the title contains any of the relevant keywords
+                if any(keyword.lower() in job_title for keyword in keywords):
                     # Find the parent container for other job details
                     parent_div = element.find_element(By.XPATH, "./ancestor::div[contains(@class, 'styles_job-listing-container__OCfZC')]")
                     
-                    # Fallback logic for company name and rating
+                    # Extract company name, location, and salary
                     company_name = "N/A"
-                    rating = "N/A"
+                    location = "N/A"
+                    salary = "N/A"
                     
                     try:
-                        company_name = parent_div.find_element(By.CSS_SELECTOR, "div.comp-name.mw-25").text.strip()
+                        company_name = parent_div.find_element(By.CSS_SELECTOR, "#listContainer > div.styles_job-listing-container__OCfZC > div > div:nth-child(7) > div > div.row2 > span > a.comp-name.mw-25").text.strip()
                     except:
-                        pass  # Ignore if company name is not found
+                        pass
                     
                     try:
-                        rating = parent_div.find_element(By.CSS_SELECTOR, "div.rating").text.strip()
+                        location = parent_div.find_element(By.CSS_SELECTOR, "#listContainer > div.styles_job-listing-container__OCfZC > div > div:nth-child(9) > div > div.row3 > div > span.loc-wrap.ver-line > span > span").text.strip()
                     except:
-                        pass  # Ignore if rating is not found
+                        pass
+                    
+                    try:
+                        salary = parent_div.find_element(By.CSS_SELECTOR, "#listContainer > div.styles_job-listing-container__OCfZC > div > div:nth-child(10) > div > div.row3 > div > span.sal-wrap.ver-line > span > span").text.strip()
+                    except:
+                        pass
                     
                     print(f"Job Title: {job_title}")
                     print(f"Company: {company_name}")
-                    print(f"Rating: {rating}")
+                    print(f"Location: {location}")
+                    print(f"Salary: {salary}")
                     print(f"Job Link: {job_link}")
                     print("-" * 50)
             except Exception as inner_e:
@@ -80,6 +104,3 @@ try:
 
 except Exception as e:
     print(f"An error occurred: {e}")
-
-finally:
-    driver.quit()
